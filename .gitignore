@@ -4,3 +4,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+
+# Ignore config files containing secrets
+COSCPFWA/COSCPFWA/Web.config
+COSCPFWA/COSCPFWA/Web.Debug.config

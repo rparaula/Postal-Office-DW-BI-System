@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Substitute connection string token in Web.Release.config
+        run: |
+          (Get-Content COSCPFWA\COSCPFWA\Web.Release.config) `
+            -replace '#{DB_CONNECTION_STRING}#', '${{ secrets.DB_CONNECTION_STRING }}' |
+          Set-Content COSCPFWA\COSCPFWA\Web.Release.config
+        shell: pwsh
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore COSCPFWA\COSCPFWA.sln
+
+      - name: Build with Release config
+        run: msbuild COSCPFWA\COSCPFWA.sln /p:Configuration=Release
