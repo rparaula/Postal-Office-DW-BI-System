@@ -25,11 +25,17 @@ jobs:
         uses: NuGet/setup-nuget@v1.0.5
 
       - name: Restore NuGet packages
-        run: nuget restore
+        run: nuget restore COSCPFWA\COSCPFWA.sln
 
-      - name: Publish to folder
-        run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
-
+      - name: Publish web app
+        run: >
+            msbuild COSCPFWA\COSCPFWA\COSCPFWA.csproj
+            /p:Configuration=Release
+            /p:DeployOnBuild=true
+            /p:WebPublishMethod=FileSystem
+            /p:DeleteExistingFiles=True
+            /p:publishUrl="${{ github.workspace }}\published"
+        
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
