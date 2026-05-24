@@ -20,11 +20,6 @@ namespace COSCPFWA
             string password = txtPassword.Text.Trim();
             string confirmPassword = txtConfirmPassword.Text.Trim();
 
-            // seperate full name into first and last name 
-            string[] nameParts = fullName.Split(' ');
-            string firstName = nameParts[0];
-            string lastName = nameParts.Length > 1 ? string.Join(" ", nameParts, 1, nameParts.Length - 1) : "";
-
             if (string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 lblMessage.Text = "Please fill in all fields.";
@@ -37,65 +32,87 @@ namespace COSCPFWA
                 return;
             }
 
+            // Separate full name into first and last name.
+            string[] nameParts = fullName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string firstName = nameParts[0];
+            string lastName = nameParts.Length > 1 ? string.Join(" ", nameParts, 1, nameParts.Length - 1) : "";
+
             try
             {
                 string connString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"].ConnectionString;
                 using (MySqlConnection conn = new MySqlConnection(connString))
                 {
                     conn.Open();
-
-                    // Check if the username or email already exists
-                    string checkUserQuery = "SELECT COUNT(*) FROM user_logins WHERE Username = @Username OR Email = @Email";
-                    using (MySqlCommand checkCmd = new MySqlCommand(checkUserQuery, conn))
+                    using (MySqlTransaction transaction = conn.BeginTransaction())
                     {
-                        checkCmd.Parameters.AddWithValue("@Username", username);
-                        checkCmd.Parameters.AddWithValue("@Email", email);
-
-                        long existingUserCount = Convert.ToInt64(checkCmd.ExecuteScalar());
-                        if (existingUserCount > 0)
+                        try
                         {
-                            lblMessage.Text = "Username or Email already exists. Please choose another.";
-                            return;
-                        }
-                    }
-
-                    string insertUserQuery = @"INSERT INTO user_logins (FirstName, LastName, Email, Username, Password) 
-                                               VALUES (@FirstName, @LastName, @Email, @Username, @Password)";
-                    using (MySqlCommand insertCmd = new MySqlCommand(insertUserQuery, conn))
-                    {
-                        insertCmd.Parameters.AddWithValue("@FirstName", firstName);
-                        insertCmd.Parameters.AddWithValue("@LastName", lastName);
-                        insertCmd.Parameters.AddWithValue("@Email", email);
-                        insertCmd.Parameters.AddWithValue("@Username", username);
-                        insertCmd.Parameters.AddWithValue("@Password", password);
-
-                        int rowsAffected = insertCmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            long newUserId = insertCmd.LastInsertedId;
-
-                            string insertRoleQuery = "INSERT INTO user_roles (UserID, RoleID) VALUES (@UserID, @RoleID)";
-                            using (MySqlCommand roleCmd = new MySqlCommand(insertRoleQuery, conn))
+                            // Check if the username or email already exists
+                            string checkUserQuery = "SELECT COUNT(*) FROM user_logins WHERE username = @Username OR email = @Email";
+                            using (MySqlCommand checkCmd = new MySqlCommand(checkUserQuery, conn, transaction))
                             {
-                                roleCmd.Parameters.AddWithValue("@UserID", newUserId);
-                                roleCmd.Parameters.AddWithValue("@RoleID", 1); // 1 is "Customer" 2, is "Employee", 3 is "Admin"
+                                checkCmd.Parameters.AddWithValue("@Username", username);
+                                checkCmd.Parameters.AddWithValue("@Email", email);
 
-                                int roleRowsAffected = roleCmd.ExecuteNonQuery();
-                                if (roleRowsAffected > 0)
+                                long existingUserCount = Convert.ToInt64(checkCmd.ExecuteScalar());
+                                if (existingUserCount > 0)
                                 {
-                                    lblMessage.ForeColor = System.Drawing.Color.Green;
-                                    lblMessage.Text = "Registration successful! You can now log in.";
-                                    Response.Redirect("~/Login.aspx");
+                                    transaction.Rollback();
+                                    lblMessage.Text = "Username or Email already exists. Please choose another.";
+                                    return;
+                                }
+                            }
+
+                            string insertUserQuery = @"INSERT INTO user_logins (first_name, last_name, email, username, password_hash)
+                                                       VALUES (@FirstName, @LastName, @Email, @Username, @Password)";
+                            using (MySqlCommand insertCmd = new MySqlCommand(insertUserQuery, conn, transaction))
+                            {
+                                insertCmd.Parameters.AddWithValue("@FirstName", firstName);
+                                insertCmd.Parameters.AddWithValue("@LastName", lastName);
+                                insertCmd.Parameters.AddWithValue("@Email", email);
+                                insertCmd.Parameters.AddWithValue("@Username", username);
+                                insertCmd.Parameters.AddWithValue("@Password", password);
+
+                                int rowsAffected = insertCmd.ExecuteNonQuery();
+                                if (rowsAffected > 0)
+                                {
+                                    long newUserId = insertCmd.LastInsertedId;
+                                    int customerRoleId = GetOrCreateRoleId(conn, transaction, "Customer");
+
+                                    string insertRoleQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (@UserID, @RoleID)";
+                                    using (MySqlCommand roleCmd = new MySqlCommand(insertRoleQuery, conn, transaction))
+                                    {
+                                        roleCmd.Parameters.AddWithValue("@UserID", newUserId);
+                                        roleCmd.Parameters.AddWithValue("@RoleID", customerRoleId);
+
+                                        int roleRowsAffected = roleCmd.ExecuteNonQuery();
+                                        if (roleRowsAffected > 0)
+                                        {
+                                            transaction.Commit();
+                                            lblMessage.ForeColor = System.Drawing.Color.Green;
+                                            lblMessage.Text = "Registration successful! You can now log in.";
+                                            Response.Redirect("~/Login.aspx", false);
+                                            Context.ApplicationInstance.CompleteRequest();
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            transaction.Rollback();
+                                            lblMessage.Text = "Error assigning role. Please try again.";
+                                        }
+                                    }
                                 }
                                 else
                                 {
-                                    lblMessage.Text = "Error assigning role. Please try again.";
+                                    transaction.Rollback();
+                                    lblMessage.Text = "Registration failed. Please try again.";
                                 }
                             }
                         }
-                        else
+                        catch
                         {
-                            lblMessage.Text = "Registration failed. Please try again.";
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }
@@ -103,6 +120,28 @@ namespace COSCPFWA
             catch (Exception ex)
             {
                 lblMessage.Text = "An error occurred during registration: " + ex.Message;
+            }
+        }
+
+        private int GetOrCreateRoleId(MySqlConnection conn, MySqlTransaction transaction, string roleName)
+        {
+            string selectRoleQuery = "SELECT role_id FROM roles WHERE role_name = @RoleName LIMIT 1";
+            using (MySqlCommand selectRoleCmd = new MySqlCommand(selectRoleQuery, conn, transaction))
+            {
+                selectRoleCmd.Parameters.AddWithValue("@RoleName", roleName);
+                object existingRoleId = selectRoleCmd.ExecuteScalar();
+                if (existingRoleId != null)
+                {
+                    return Convert.ToInt32(existingRoleId);
+                }
+            }
+
+            string insertRoleQuery = "INSERT INTO roles (role_name) VALUES (@RoleName)";
+            using (MySqlCommand insertRoleCmd = new MySqlCommand(insertRoleQuery, conn, transaction))
+            {
+                insertRoleCmd.Parameters.AddWithValue("@RoleName", roleName);
+                insertRoleCmd.ExecuteNonQuery();
+                return Convert.ToInt32(insertRoleCmd.LastInsertedId);
             }
         }
     }

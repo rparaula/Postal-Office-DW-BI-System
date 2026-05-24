@@ -1,11 +1,8 @@
-﻿using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Web;
+using System.Globalization;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace COSCPFWA
 {
@@ -13,100 +10,235 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // initialization code 
         }
 
         protected void btnSchedulePickup_Click(object sender, EventArgs e)
         {
-            // get the pickup date, time, and location from the form
-            string pickupDate = txtPickupDate.Text;
-            string pickupTime = txtPickupTime.Text;
-            string location = ddlLocation.SelectedValue;
+            string pickupDate = txtPickupDate.Text.Trim();
+            string pickupTime = txtPickupTime.Text.Trim();
+            string locationValue = ddlLocation.SelectedValue;
+            string locationText = ddlLocation.SelectedItem == null ? "" : ddlLocation.SelectedItem.Text;
 
-            if (string.IsNullOrEmpty(pickupDate) || string.IsNullOrEmpty(pickupTime) || string.IsNullOrEmpty(location))
+            if (string.IsNullOrEmpty(pickupDate) || string.IsNullOrEmpty(pickupTime) || string.IsNullOrEmpty(locationValue))
             {
-                lblMessage.Text = "Please fill out all fields.";
-                lblMessage.Visible = true;
+                ShowMessage("Please fill out all fields.", false);
                 return;
             }
 
-            DateTime parsedDate;
-            if (!DateTime.TryParseExact(pickupDate, "yyyy/MM/dd", null, System.Globalization.DateTimeStyles.None, out parsedDate))
+            if (!DateTime.TryParseExact(pickupDate, "yyyy/MM/dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
-                lblMessage.Text = "Invalid date format. Please use yyyy/mm/dd.";
-                lblMessage.Visible = true;
+                ShowMessage("Invalid date format. Please use yyyy/mm/dd.", false);
                 return;
             }
 
-            // check the time is within the allowed range
-            DateTime parsedTime;
-            if (!DateTime.TryParseExact(pickupTime, "HH:mm", null, System.Globalization.DateTimeStyles.None, out parsedTime))
+            string[] timeFormats = { "HH:mm", "H:mm", "h:mm tt", "hh:mm tt" };
+            if (!DateTime.TryParseExact(pickupTime, timeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedTime))
             {
-                lblMessage.Text = "Invalid time format. Please use HH:mm (e.g., 14:00).";
-                lblMessage.Visible = true;
+                ShowMessage("Invalid time format. Please use HH:mm or h:mm AM/PM.", false);
                 return;
             }
 
-            // validation for valid pickup times based on the day of the week
-            var dayOfWeek = parsedDate.DayOfWeek;
+            TimeSpan pickupTimeOfDay = parsedTime.TimeOfDay;
+            DateTime scheduledPickupAt = parsedDate.Date.Add(pickupTimeOfDay);
 
-            // check if the time is valid for the selected day
-            if (dayOfWeek == DayOfWeek.Sunday)
+            if (parsedDate.DayOfWeek == DayOfWeek.Sunday)
             {
-                lblMessage.Text = "Pickup is not available on Sundays.";
-                lblMessage.Visible = true;
+                ShowMessage("Pickup is not available on Sundays.", false);
                 return;
             }
-            else if (dayOfWeek == DayOfWeek.Saturday)
+
+            if (parsedDate.DayOfWeek == DayOfWeek.Saturday)
             {
-                // Saturday: 9am to 3pm
-                if (parsedTime.Hour < 9 || parsedTime.Hour >= 15)
+                if (pickupTimeOfDay < TimeSpan.FromHours(9) || pickupTimeOfDay >= TimeSpan.FromHours(15))
                 {
-                    lblMessage.Text = "Pickup time on Saturday must be between 9:00 AM and 3:00 PM.";
-                    lblMessage.Visible = true;
+                    ShowMessage("Pickup time on Saturday must be between 9:00 AM and 3:00 PM.", false);
                     return;
                 }
             }
-            else
+            else if (pickupTimeOfDay < TimeSpan.FromHours(8) || pickupTimeOfDay >= TimeSpan.FromHours(19))
             {
-                // Weekdays: 8am to 7pm
-                if (parsedTime.Hour < 8 || parsedTime.Hour >= 19)
-                {
-                    lblMessage.Text = "Pickup time on weekdays must be between 8:00 AM and 7:00 PM.";
-                    lblMessage.Visible = true;
-                    return;
-                }
+                ShowMessage("Pickup time on weekdays must be between 8:00 AM and 7:00 PM.", false);
+                return;
             }
-            /*
-            try
+
+            string connString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"]?.ConnectionString;
+            if (string.IsNullOrEmpty(connString))
             {
-                string connString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"].ConnectionString;
-                using (MySqlConnection conn = new MySqlConnection(connString))
+                ShowMessage("Database connection string is missing or misconfigured.", false);
+                return;
+            }
+
+            using (MySqlConnection conn = new MySqlConnection(connString))
+            {
+                try
                 {
                     conn.Open();
-                    string query = "INSERT INTO PickupSchedules (CustomerID, PickupDate, PickupTime, Location) VALUES (@CustomerID, @PickupDate, @PickupTime, @Location)";
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    using (MySqlTransaction transaction = conn.BeginTransaction())
                     {
-                        // parameters to the query
-                        cmd.Parameters.AddWithValue("@CustomerID", 1);  // Replace with actual customer ID
-                        cmd.Parameters.AddWithValue("@PickupDate", parsedDate);
-                        cmd.Parameters.AddWithValue("@PickupTime", parsedTime);
-                        cmd.Parameters.AddWithValue("@Location", location)
-                        cmd.ExecuteNonQuery();
+                        try
+                        {
+                            int customerId = GetCurrentCustomerId(conn, transaction);
+                            CustomerInfo customer = GetCustomerInfo(conn, transaction, customerId);
+                            int packageStatusId = GetRequiredId(conn, transaction, "package_status", "package_status_id", "status_name", "Received");
+                            int serviceTypeId = GetRequiredId(conn, transaction, "service_type", "service_type_id", "service_type_name", "Pickup");
 
+                            string packageQuery = @"
+                                INSERT INTO package
+                                    (customer_id, package_status_id, service_type_id, received_date, service_type, contents, weight_lbs, length_in, width_in, height_in)
+                                VALUES
+                                    (@CustomerID, @PackageStatusID, @ServiceTypeID, @ReceivedDate, @ServiceType, @Contents, @WeightLbs, @LengthIn, @WidthIn, @HeightIn)";
+
+                            int packageId;
+                            using (MySqlCommand packageCmd = new MySqlCommand(packageQuery, conn, transaction))
+                            {
+                                packageCmd.Parameters.AddWithValue("@CustomerID", customerId);
+                                packageCmd.Parameters.AddWithValue("@PackageStatusID", packageStatusId);
+                                packageCmd.Parameters.AddWithValue("@ServiceTypeID", serviceTypeId);
+                                packageCmd.Parameters.AddWithValue("@ReceivedDate", scheduledPickupAt);
+                                packageCmd.Parameters.AddWithValue("@ServiceType", "Pickup");
+                                packageCmd.Parameters.AddWithValue("@Contents", "Scheduled pickup");
+                                packageCmd.Parameters.AddWithValue("@WeightLbs", 1m);
+                                packageCmd.Parameters.AddWithValue("@LengthIn", 1m);
+                                packageCmd.Parameters.AddWithValue("@WidthIn", 1m);
+                                packageCmd.Parameters.AddWithValue("@HeightIn", 1m);
+                                packageCmd.ExecuteNonQuery();
+                                packageId = Convert.ToInt32(packageCmd.LastInsertedId);
+                            }
+
+                            string pickupQuery = @"
+                                INSERT INTO pickupdetails
+                                    (package_id, sender_customer_id, sender_address, recipient_address, recipient_first_name, recipient_last_name)
+                                VALUES
+                                    (@PackageID, @SenderCustomerID, @SenderAddress, @RecipientAddress, @RecipientFirstName, @RecipientLastName)";
+
+                            using (MySqlCommand pickupCmd = new MySqlCommand(pickupQuery, conn, transaction))
+                            {
+                                pickupCmd.Parameters.AddWithValue("@PackageID", packageId);
+                                pickupCmd.Parameters.AddWithValue("@SenderCustomerID", customerId);
+                                pickupCmd.Parameters.AddWithValue("@SenderAddress", customer.FullAddress);
+                                pickupCmd.Parameters.AddWithValue("@RecipientAddress", $"{locationText} pickup scheduled for {scheduledPickupAt:g}");
+                                pickupCmd.Parameters.AddWithValue("@RecipientFirstName", customer.FirstName);
+                                pickupCmd.Parameters.AddWithValue("@RecipientLastName", customer.LastName);
+                                pickupCmd.ExecuteNonQuery();
+                            }
+
+                            transaction.Commit();
+                            Session["PackageID"] = packageId;
+                            ShowMessage("Pickup successfully scheduled!", true);
+                            ClearInputs();
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    ShowMessage("Database error: " + ex.Message, false);
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("An unexpected error occurred: " + ex.Message, false);
+                }
+            }
+        }
+
+        private int GetCurrentCustomerId(MySqlConnection conn, MySqlTransaction transaction)
+        {
+            if (Session["CustomerID"] != null)
+            {
+                return Convert.ToInt32(Session["CustomerID"]);
+            }
+
+            if (Session["UserID"] != null)
+            {
+                string query = "SELECT customer_id FROM customer WHERE user_id = @UserID LIMIT 1";
+                using (MySqlCommand cmd = new MySqlCommand(query, conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@UserID", Convert.ToInt32(Session["UserID"]));
+                    object result = cmd.ExecuteScalar();
+                    if (result != null)
+                    {
+                        int customerId = Convert.ToInt32(result);
+                        Session["CustomerID"] = customerId;
+                        return customerId;
                     }
                 }
             }
-            */
 
-            lblMessage.Text = "Pickup successfully scheduled!";
-            lblMessage.CssClass = "alert alert-success";
+            throw new InvalidOperationException("Please complete shipping information before scheduling a pickup.");
+        }
+
+        private CustomerInfo GetCustomerInfo(MySqlConnection conn, MySqlTransaction transaction, int customerId)
+        {
+            string query = @"
+                SELECT first_name, last_name, street_address, city, state_code, zip_code
+                FROM customer
+                WHERE customer_id = @CustomerID
+                LIMIT 1";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn, transaction))
+            {
+                cmd.Parameters.AddWithValue("@CustomerID", customerId);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        throw new InvalidOperationException("The selected customer does not exist.");
+                    }
+
+                    string street = reader["street_address"].ToString();
+                    string city = reader["city"].ToString();
+                    string state = reader["state_code"].ToString();
+                    string zip = reader["zip_code"].ToString();
+
+                    return new CustomerInfo
+                    {
+                        FirstName = reader["first_name"].ToString(),
+                        LastName = reader["last_name"].ToString(),
+                        FullAddress = $"{street}, {city}, {state} {zip}"
+                    };
+                }
+            }
+        }
+
+        private static int GetRequiredId(MySqlConnection conn, MySqlTransaction transaction, string tableName, string idColumn, string nameColumn, string nameValue)
+        {
+            string query = $"SELECT {idColumn} FROM {tableName} WHERE {nameColumn} = @Name LIMIT 1";
+            using (MySqlCommand cmd = new MySqlCommand(query, conn, transaction))
+            {
+                cmd.Parameters.AddWithValue("@Name", nameValue);
+                object result = cmd.ExecuteScalar();
+                if (result == null)
+                {
+                    throw new InvalidOperationException($"Missing required {tableName} row: {nameValue}.");
+                }
+
+                return Convert.ToInt32(result);
+            }
+        }
+
+        private void ShowMessage(string message, bool isSuccess)
+        {
+            lblMessage.Text = message;
+            lblMessage.CssClass = isSuccess ? "alert alert-success" : "alert alert-danger";
             lblMessage.Visible = true;
+        }
 
-            // optional: clear inputs after successful scheduling
+        private void ClearInputs()
+        {
             txtPickupDate.Text = "";
             txtPickupTime.Text = "";
             ddlLocation.SelectedIndex = 0;
+        }
+
+        private class CustomerInfo
+        {
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string FullAddress { get; set; }
         }
     }
 }

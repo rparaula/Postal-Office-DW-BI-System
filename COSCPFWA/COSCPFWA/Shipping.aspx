@@ -89,7 +89,7 @@
     <div class="main-container">
         <div class="shipping-form-container">
             <h2>Shipping Information</h2>
-            <form>
+            <div>
                 <div class="form-group">
                     <label for="country">Country or Territory</label>
                     <%-- Changed to dropdown and added ALL MISSING "asp:" prefixes  --%>
@@ -136,8 +136,7 @@
                     </div>
                     <asp:Button ID="SubmitButton" runat="server" CssClass="submit-btn" Text="Submit" OnClick="SubmitButton_Click" />
                     <%-- Forgot to associate the submit button to the C# function AND changed "onserverclick" to "OnClick" --%>
-            </form>
+            </div>
         </div>
-        <%-- Missing runat="server" statement to allow ASP.NET to manage form submission at line 79 --%>
     </div>
 </asp:Content>

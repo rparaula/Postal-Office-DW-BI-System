@@ -98,10 +98,10 @@
             <div class="form-group">
                 <label for="shippingMethod">Shipping Method</label>
                 <asp:DropDownList ID="shippingMethod" runat="server" CssClass="form-control">
-                    <asp:ListItem Value="" Text="Select a method" Disabled="true" Selected="true"></asp:ListItem>
-                    <asp:ListItem Value="Standard" Text="Standard"></asp:ListItem>
-                    <asp:ListItem Value="Express" Text="Express"></asp:ListItem>
-                    <asp:ListItem Value="Overnight" Text="Overnight"></asp:ListItem>
+                    <asp:ListItem Value="" Text="Select a method" Enabled="false" Selected="true"></asp:ListItem>
+                    <asp:ListItem Value="1" Text="Air"></asp:ListItem>
+                    <asp:ListItem Value="2" Text="Ground"></asp:ListItem>
+                    <asp:ListItem Value="3" Text="Express"></asp:ListItem>
                 </asp:DropDownList>
             </div>
             <div class="form-group">
