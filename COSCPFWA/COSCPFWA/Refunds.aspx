@@ -33,15 +33,15 @@
             </HeaderTemplate>
             <ItemTemplate>
                 <tr>
-                    <td><%# Eval("RefundID") %></td>
-                    <td><%# Eval("CustomerName") %></td>
-                    <td><%# Eval("PackageID") %></td>
-                    <td><%# Eval("RefundAmount", "{0:C}") %></td>
-                    <td><%# Eval("RefundReason") %></td>
-                    <td><%# Eval("RefundDate", "{0:yyyy-MM-dd}") %></td>
-                    <td><%# Eval("RefundStatus") %></td>
+                    <td><%# Eval("refund_id") %></td>
+                    <td><%# Eval("customer_name") %></td>
+                    <td><%# Eval("package_id") %></td>
+                    <td><%# Eval("refund_amount", "{0:C}") %></td>
+                    <td><%# Eval("refund_reason") %></td>
+                    <td><%# Eval("refund_date", "{0:yyyy-MM-dd}") %></td>
+                    <td><%# Eval("refund_status") %></td>
                     <td>
-                        <asp:Button ID="btnApprove" runat="server" Text="Approve" CssClass="btn btn-sm btn-success" CommandArgument='<%# Eval("RefundID") %>' OnClick="btnApprove_Click" />
+                        <asp:Button ID="btnApprove" runat="server" Text="Approve" CssClass="btn btn-sm btn-success" CommandArgument='<%# Eval("refund_id") %>' OnClick="btnApprove_Click" />
                     </td>
                 </tr>
             </ItemTemplate>
