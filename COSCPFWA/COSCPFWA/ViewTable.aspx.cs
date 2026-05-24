@@ -19,7 +19,7 @@ namespace COSCPFWA
         {
             {"customer", "CustomerID" },
             {"package", "PackageID" },
-            { "employee", "EmployeeID" },
+            { "employee", "employee_id" },
             {"notifications", "NotificationID" },
             {"trackinghistory", "TrackingID" },
             {"incident", "IncidentID" },

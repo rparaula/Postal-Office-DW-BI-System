@@ -1,7 +1,9 @@
-﻿using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 using System;
 using System.Configuration;
+using System.Data;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace COSCPFWA
 {
@@ -9,55 +11,81 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Retrieve connection string from the configuration
-            string dbConnectionString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"].ConnectionString;
+            LoadEmployees();
+        }
 
-            // Local variables for CustomerID and LoginPassword
-            int customerID = 69; // Set this to the desired CustomerID for testing
-            string loginPassword = "RyanTest"; // Set this to the desired password for testing
+        private void LoadEmployees()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"]?.ConnectionString;
+            if (string.IsNullOrEmpty(connString))
+            {
+                ShowMessage("Database connection string is missing or misconfigured.");
+                return;
+            }
 
-            // Establish a connection to the database
-            using (MySqlConnection con = new MySqlConnection(dbConnectionString))
+            using (MySqlConnection conn = new MySqlConnection(connString))
             {
                 try
                 {
-                    con.Open();
-                    Response.Write("Connection successful!<br>");
+                    conn.Open();
+                    string query = @"
+                        SELECT e.employee_id,
+                               e.full_name,
+                               e.role_name,
+                               e.email,
+                               e.phone_number,
+                               e.street_address,
+                               d.department_name,
+                               po.postal_office_name,
+                               e.salary,
+                               e.hours_worked,
+                               manager.full_name AS manager_name
+                        FROM employee e
+                        LEFT JOIN departments d ON e.department_id = d.department_id
+                        LEFT JOIN postaloffice po ON e.postal_office_id = po.postal_office_id
+                        LEFT JOIN employee manager ON e.manager_employee_id = manager.employee_id
+                        ORDER BY e.employee_id";
 
-                    // Insert CustomerID and LoginPassword using local variables
-                    string insertQuery = "INSERT INTO user_logins (CustomerID, LoginPassword) VALUES (@CustomerID, @LoginPassword)";
-                    using (MySqlCommand insertCmd = new MySqlCommand(insertQuery, con))
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    using (MySqlDataAdapter adapter = new MySqlDataAdapter(cmd))
                     {
-                        // Add parameters to the insert command
-                        insertCmd.Parameters.AddWithValue("@CustomerID", customerID);
-                        insertCmd.Parameters.AddWithValue("@LoginPassword", loginPassword);
-
-                        // Execute the insert command
-                        insertCmd.ExecuteNonQuery();
-                        Response.Write("CustomerID and LoginPassword inserted successfully!<br>");
+                        DataTable employees = new DataTable();
+                        adapter.Fill(employees);
+                        BindEmployeeGrid(employees);
                     }
-
-                    // Define the SQL query to retrieve all data from  table
-                    string selectQuery = "SELECT CustomerID, LoginPassword FROM user_logins";
-                    MySqlCommand selectCmd = new MySqlCommand(selectQuery, con);
-
-                    // Execute the select query
-                    using (MySqlDataReader reader = selectCmd.ExecuteReader())
-                    {
-                        // Display each row of data
-                        while (reader.Read())
-                        {
-                            Response.Write("CustomerID: " + reader["CustomerID"].ToString() + "<br>");
-                            Response.Write("LoginPassword: " + reader["LoginPassword"].ToString() + "<br><br>");
-                        }
-                    }
+                }
+                catch (MySqlException ex)
+                {
+                    ShowMessage("Database error loading employees: " + ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    // Handle any errors
-                    Response.Write("Error: " + ex.Message);
+                    ShowMessage("An unexpected error occurred loading employees: " + ex.Message);
                 }
             }
+        }
+
+        private void BindEmployeeGrid(DataTable employees)
+        {
+            GridView employeeGrid = new GridView
+            {
+                ID = "EmployeesGrid",
+                AutoGenerateColumns = true,
+                CssClass = "table table-striped",
+                GridLines = GridLines.None,
+                DataSource = employees
+            };
+
+            employeeGrid.DataBind();
+            form1.Controls.Add(new LiteralControl("<div style=\"margin: 20px; overflow-x: auto;\">"));
+            form1.Controls.Add(employeeGrid);
+            form1.Controls.Add(new LiteralControl("</div>"));
+        }
+
+        private void ShowMessage(string message)
+        {
+            string safeMessage = Server.HtmlEncode(message);
+            form1.Controls.Add(new LiteralControl("<div style=\"margin: 20px; color: #b00020;\">" + safeMessage + "</div>"));
         }
     }
 }

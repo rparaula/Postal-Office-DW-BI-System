@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Configuration;
 using MySql.Data.MySqlClient;
+using System;
+using System.Configuration;
+using System.Globalization;
 
 namespace COSCPFWA
 {
@@ -13,53 +9,75 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            employeeID.Attributes["min"] = "1";
+            salary.Attributes["min"] = "0";
+            salary.Attributes["step"] = "0.01";
         }
 
         protected void SaveButton_Click(object sender, EventArgs e)
         {
-            //debugging flag
-            Response.Write("<script>alert('Debugging');</script>");
+            int employeeIdValue;
+            if (!int.TryParse(employeeID.Text.Trim(), out employeeIdValue) || employeeIdValue <= 0)
+            {
+                ShowAlert("Employee ID must be a positive whole number.");
+                return;
+            }
 
-            string connString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"].ConnectionString;
-            string employeeID = Request.Form["employeeID"];
-            string salary = Request.Form["salary"];
+            decimal salaryValue;
+            if (!decimal.TryParse(salary.Text.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out salaryValue) || salaryValue < 0)
+            {
+                ShowAlert("Salary must be a valid non-negative number.");
+                return;
+            }
+
+            string connString = ConfigurationManager.ConnectionStrings["DataBaseConnectionString"]?.ConnectionString;
+            if (string.IsNullOrEmpty(connString))
+            {
+                ShowAlert("Database connection string is missing or misconfigured.");
+                return;
+            }
 
             using (MySqlConnection conn = new MySqlConnection(connString))
             {
                 try
                 {
                     conn.Open();
-                    string query = "UPDATE employee SET Salary = @Salary WHERE EmployeeID = @EmployeeID";
+                    string query = @"
+                        UPDATE employee
+                        SET salary = @Salary
+                        WHERE employee_id = @EmployeeID";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@Salary", salary);
-                        cmd.Parameters.AddWithValue("@EmployeeID", employeeID);
+                        cmd.Parameters.Add("@Salary", MySqlDbType.Decimal).Value = salaryValue;
+                        cmd.Parameters.AddWithValue("@EmployeeID", employeeIdValue);
 
-                        //executed command
                         int rowsAffected = cmd.ExecuteNonQuery();
-
                         if (rowsAffected > 0)
                         {
-                            Response.Write("<script>alert('Done.');</script>");
+                            ShowAlert("Employee salary updated successfully.");
                         }
                         else
                         {
-                            Response.Write("<script>alert('No matching EmployeeID found.');</script>");
+                            ShowAlert("No matching employee ID was found.");
                         }
                     }
                 }
                 catch (MySqlException ex)
                 {
-                    //catch block error
-                    Response.Write("<script>alert('MySQL Error: " + ex.Message.Replace("'", "\\'") + "');</script>");
+                    ShowAlert("Database error updating employee salary: " + ex.Message);
                 }
                 catch (Exception ex)
                 {
-                    //general error
-                    Response.Write("<script>alert('An error occurred: " + ex.Message.Replace("'", "\\'") + "');</script>");
+                    ShowAlert("An unexpected error occurred: " + ex.Message);
                 }
             }
+        }
+
+        private void ShowAlert(string message)
+        {
+            string safeMessage = message.Replace("\\", "\\\\").Replace("'", "\\'");
+            ClientScript.RegisterStartupScript(GetType(), "editEmployeeAlert", $"alert('{safeMessage}');", true);
         }
     }
 }
