@@ -41,6 +41,9 @@ Password: adminpassword
 
 
 ![Architecture Diagram](images/warehouse_architecture.drawio.svg)
+
+https://app.diagrams.net/?lightbox=1#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Frparaula%2FPostal-Office-DW-BI-System%2Fmain%2Fimages%2Farchitecture.drawio.svg
+
 <p align="center">
   <a href="images/architecture.drawio.svg">Open full-size diagram</a>
 </p>
