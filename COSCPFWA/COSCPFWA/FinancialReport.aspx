@@ -8,7 +8,7 @@
             min-height: 650px;
         }
 
-        .powerbi-report-container {
+        .powerbi-report-frame {
             width: 100%;
             height: 100%;
             border: none;
@@ -18,48 +18,13 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main class="powerbi-report-shell">
-        <div id="financeReportContainer" class="powerbi-report-container"></div>
-
-        <asp:HiddenField ID="hfReportId" runat="server" />
-        <asp:HiddenField ID="hfEmbedUrl" runat="server" />
-        <asp:HiddenField ID="hfEmbedToken" runat="server" />
+        <iframe
+            id="financeReportFrame"
+            runat="server"
+            title="Postal Financial Reports"
+            class="powerbi-report-frame"
+            frameborder="0"
+            allowfullscreen="true">
+        </iframe>
     </main>
-</asp:Content>
-
-<asp:Content ID="ScriptsContent" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var reportId = document.getElementById("<%= hfReportId.ClientID %>").value;
-            var embedUrl = document.getElementById("<%= hfEmbedUrl.ClientID %>").value;
-            var embedToken = document.getElementById("<%= hfEmbedToken.ClientID %>").value;
-
-            if (!reportId || !embedUrl || !embedToken) {
-                document.getElementById("financeReportContainer").innerHTML =
-                    "<div class='alert alert-warning'>Power BI report embed settings are not configured yet.</div>";
-                return;
-            }
-
-            var models = window["powerbi-client"].models;
-
-            var config = {
-                type: "report",
-                id: reportId,
-                embedUrl: embedUrl,
-                accessToken: embedToken,
-                tokenType: models.TokenType.Embed,
-                settings: {
-                    panes: {
-                        filters: { visible: false },
-                        pageNavigation: { visible: true }
-                    },
-                    background: models.BackgroundType.Transparent
-                }
-            };
-
-            var container = document.getElementById("financeReportContainer");
-            powerbi.embed(container, config);
-        });
-    </script>
 </asp:Content>

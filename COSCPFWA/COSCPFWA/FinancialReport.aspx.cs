@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
     public partial class FinancialReport : Page
     {
+        private const string FinanceEmbedUrl =
+            "https://app.powerbi.com/reportEmbed?reportId=7b8687f0-b521-4667-8847-6d750dacf07a&autoAuth=true&ctid=4598922a-214e-4901-8db4-16bce2cc69da";
+
         protected void Page_Load(object sender, EventArgs e)
         {
             Authz.RequireFinanceAccess();
@@ -24,19 +24,44 @@ namespace COSCPFWA
         {
             var user = Authz.CurrentUser;
 
-            // TODO:
-            // Replace these placeholders with values from your Power BI embed service.
-            hfReportId.Value = "7b8687f0-b521-4667-8847-6d750dacf07";
-            hfEmbedUrl.Value = "https://app.powerbi.com/reportEmbed?reportId=7b8687f0-b521-4667-8847-6d750dacf07a&autoAuth=true&ctid=4598922a-214e-4901-8db4-16bce2cc69da";
-            hfEmbedToken.Value = "YOUR_GENERATED_EMBED_TOKEN";
+            if (user == null)
+            {
+                Response.Redirect("~/Login.aspx", true);
+                return;
+            }
 
-            // Important:
-            // If user.FinanceAccessScope == "OwnFacility",
-            // your Power BI embed-token generation should apply RLS using
-            // user.EffectiveFacilityScopeKey or user.FacilityId.
-            //
-            // If user.FinanceAccessScope == "AllFacilities",
-            // the user can receive the full financial report scope.
+            string embedUrl = FinanceEmbedUrl;
+
+            if (string.Equals(user.FinanceAccessScope, "OwnFacility", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!user.EffectiveFacilityScopeKey.HasValue)
+                {
+                    Response.Redirect("~/Unauthorized.aspx", true);
+                    return;
+                }
+
+                embedUrl = AddFacilityFilter(embedUrl, user.EffectiveFacilityScopeKey.Value);
+            }
+            else if (!string.Equals(user.FinanceAccessScope, "AllFacilities", StringComparison.OrdinalIgnoreCase))
+            {
+                Response.Redirect("~/Unauthorized.aspx", true);
+                return;
+            }
+
+            financeReportFrame.Attributes["src"] = embedUrl;
+        }
+
+        private static string AddFacilityFilter(string embedUrl, int facilityKey)
+        {
+            // IMPORTANT:
+            // Replace DimFacility/FacilityKey with the exact Power BI table/column name.
+            // Example alternatives:
+            // dim_facility/facility_id
+            // DimFacility/FacilityId
+            // Facility/facility_key
+
+            string filter = $"DimFacility/FacilityKey eq {facilityKey}";
+            return embedUrl + "&filter=" + HttpUtility.UrlEncode(filter);
         }
     }
 }

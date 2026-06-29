@@ -15,30 +15,12 @@ namespace COSCPFWA
     {
 
         /// <summary>
-        /// hfReportId control.
+        /// financeReportFrame control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfReportId;
-
-        /// <summary>
-        /// hfEmbedUrl control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfEmbedUrl;
-
-        /// <summary>
-        /// hfEmbedToken control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfEmbedToken;
+        protected global::System.Web.UI.HtmlControls.HtmlIframe financeReportFrame;
     }
 }
