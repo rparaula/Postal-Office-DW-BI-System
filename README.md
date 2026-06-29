@@ -39,7 +39,7 @@ Password: adminpassword
 
 
 
-![Architecture Diagram](images\Postal Warehouse Architecture.svg)
+![Architecture Diagram](images\architecture.drawio.svg)
 
 
 ---------------------------------------------------------
