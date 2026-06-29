@@ -2,7 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\COSCPFWA",
-    "\\COSCPFWA\\COSCPFWA"
+    "\\COSCPFWA\\COSCPFWA",
+    "\\data_warehouse\\source_layer"
   ],
   "SelectedNode": "\\COSCPFWA\\COSCPFWA.sln",
   "PreviewInSolutionExplorer": false
