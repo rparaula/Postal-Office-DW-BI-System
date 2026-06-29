@@ -41,7 +41,9 @@ Password: adminpassword
 
 
 ![Architecture Diagram](images/warehouse_architecture.drawio.svg)
-
+<p align="center">
+  <a href="images/architecture.drawio.svg">Open full-size diagram</a>
+</p>
 
 ---------------------------------------------------------
 
