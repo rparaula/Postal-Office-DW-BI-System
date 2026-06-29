@@ -93,6 +93,7 @@
                         </asp:PlaceHolder>
 
                         <asp:PlaceHolder ID="phFinanceNav" runat="server">
+                            <li class="nav-item"><a class="nav-link" runat="server" href="~/FinancialReport">Financial Report</a></li>
                             <li class="nav-item"><a class="nav-link" runat="server" href="~/DataReportRequest">Reports</a></li>
                         </asp:PlaceHolder>
 

@@ -229,6 +229,7 @@
     <Content Include="Contact.aspx" />
     <Content Include="Content\Site.css" />
     <Content Include="DataReportRequest.aspx" />
+	<Content Include="FinancialReport.aspx" />
     <Content Include="Home.aspx" />
     <Content Include="Employee.aspx" />
     <Content Include="favicon.ico" />
@@ -377,6 +378,13 @@
     <Compile Include="DataReportRequest.aspx.designer.cs">
       <DependentUpon>DataReportRequest.aspx</DependentUpon>
     </Compile>
+	<Compile Include="FinancialReport.aspx.cs">
+		<DependentUpon>FinancialReport.aspx</DependentUpon>
+		<SubType>ASPXCodeBehind</SubType>
+	</Compile>
+	<Compile Include="FinancialReport.aspx.designer.cs">
+		<DependentUpon>FinancialReport.aspx</DependentUpon>
+	</Compile>
     <Compile Include="Home.aspx.cs">
       <DependentUpon>Home.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
