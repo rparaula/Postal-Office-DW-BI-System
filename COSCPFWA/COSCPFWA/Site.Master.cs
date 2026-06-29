@@ -56,7 +56,11 @@ namespace COSCPFWA
 
             phCustomerNav.Visible = isLoggedIn && user.HasRole("Customer");
             phEmployeeNav.Visible = isLoggedIn && user.HasAnyRole("Employee", "DepartmentManager", "FacilityManager", "WebAdmin", "ReportAdmin");
-            phFinanceNav.Visible = isLoggedIn && user.CanViewFinance;
+            phFinanceNav.Visible = isLoggedIn &&
+                (
+                    user.CanViewFinance ||
+                    user.HasAnyRole("FacilityManager", "ReportAnalyst", "ReportAdmin")
+                );
             phLogisticsNav.Visible = isLoggedIn && user.CanViewLogistics;
             phAdminNav.Visible = isLoggedIn && user.HasAnyRole("WebAdmin", "ReportAdmin");
             lnkLogin.Visible = !isLoggedIn;
