@@ -1,0 +1,178 @@
+One record within the facility table represents one unique USPS facility. Their location is referenced using the "territory" and "zip_geo" tables.
+	- Each facility can be categorized under a facility type (Post Office, Vehicle Maintenance, Administrative Office, Network Facilities, Mail Processing). Referenced by facility_type.
+	- From the original USPS dataset, a facility can have multiple facility types; however, within this project we organized a facility type hierarchy so each facility has 1 type only.
+		- Hierarchy goes Post Office < Vehicle Maintenance < Administrative Office < Network Facilities < Mail Processing
+		- So if a facility is both a Network Facility and Mail Processing, it will mainly be registered as a mail processing facility.
+		- This is also because to simulate a package's lifecycle, we are only concerned with post offices, network facilities, and mail processing facilities.
+
+Every facility can have multiple departments. Every department can have multiple employees. In this scenario, an employee can only belong to one specific department at a time.
+	- Every department name starts with a suffix that is based on the facilities name for easy identification. Example, the delivery department at Eastwood is "EW_Delivery".
+	- The "type" of department, which is basically just the suffix used in the department_name field is dependent on what type of facility the department belongs to.
+		- A post office facility will have 3 departments: "Retail Services", "Delivery", and "Logistics"
+		- A network facility will have 4 departments: "Delivery", "Logistics", "Operations", and "Administrative"
+		- A mail processing facility will have 4 departments: "Logistics", "Operations", "Maintenance", and "Administrative"
+		- For simplicity reasons, Vehicle Maintenance and Administrative Office will only have 1 department, "Maintenance" and "Administrative" respectively.
+
+
+
+All employees can only belong to one department at a time. Through this hierarchy employee -> department -> facility -> territory, you can determine where both structurally and locationally where a employee works. Within the employee table, each record identifies one unique employee.
+
+
+We also have a customers table where each record identifies one unique customer. All customers are located within Texas. A customer can order a multitude of package, and each package can be received at any facility, but likely majority of customers will have their packages received by their closest facility or preferred facility. Within the customer's table we keep track of a variety of personal information to identify each customer such as...
+	- Names / Identification
+		- Customer ID
+		- First Name
+		- Middle Initial
+		- Last Name
+	- Location
+		- Street Address
+		- City
+		- State Code (TX only for now)
+		- ZIP Code
+		- Territory ID
+	- Contact Info
+		- Phone number
+			- First 3 digits must represent Texas area codes
+		- Email
+		- UserID (For web authentication)
+	- Personal Info
+		- Birth Date
+			- Has to be at least 18 by their first package
+		- Marital Status
+			- M / S
+		- Gender
+			- Male, Female, or "N/A"
+		- Email Address
+			- Long as it looks like a legit email
+		- Annual Income
+			- Very High >= $150,000 per year
+			- High >= $100,000 per year
+			- Medium >= $50,000 per year
+			- Low < $50,000 per year
+		- Total Children
+			- 0 to 5 (Majority should be 0, with an exponential decrease in  population with each child. I.e., # ppl w/ 0 > # ppl with 1 > # ppl with 2 > # ppl with 3 etc.)
+		- Education Level
+			- 5 Options -> {Partial High School, High School, Graduate Degree, Partial College, & Bachelors)
+		- Occupation
+			- 5 Options -> {Skilled Manual, Professional, Management, Clerical, & Manual}
+		- Home Owner
+			- Yes / No
+
+
+For the initiation process of creating a package, we'll need both the package table and the shippingdetails table. Each record within the package table represents a unique package and some basic information about that package (like status, service type, employee, customer, dimensions, etc.), which is paired with a corresponding record within the shippingdetails table. Each record within the shipping details table corresponds to all the info need to deliver that unique package to it's intended address.
+
+
+To simulate realistic trends like...how often each customer demographic orders a package, the type (both package contents & dimensions) of package a demographic orders, and the difference of these between each demographic of customers I decided to use the "Brazilian E-Commerce Public Dataset by Olist" dataset as a source of realistic inspiration. Within this dataset, I plan to use its' contents to map a realistic distribution of customer demographic, a time-series of each customer orders, and the beginning stage of each package's lifecycle (which is the timestamps of when a package was received at the post office, timestamp of when the package was sorted, and timestamp when package was ready to be moved from its' origin facility).
+
+To establish our customer records, I plan to use the olist_customers_dataset.csv as inspiration in creating a staging import file for the customers table within my MySQL database. With the Olist customers dataset, each record represents a single unique order placed by a customer. The dataset has a customer_id being the key to the orders dataset, customer_unique_id being the unique identifier for each customer, and fields for the first 5 digits for the customer ZIP, as well as city name and state; however, as you can probably see by inspecting the actual dataset most of the customer's location are in reference to South American locations.
+
+Thus, I plan to use Olist's customer_id's and customer_unique_id's for identification on my own customers but map each customer's South American ZIP, city, and state to Texas-based locations instead. Also since my customer's table has each record representing a unique character while the Olist customers dataset has each record representing each unique order under an individual customer, I'll have to deduplicate customer_unique_id's before mapping Texas geography to the Olist customers. Thus, the final import csv will look something like this.
+	- customer_id -> will later to be used to map to package_id
+	- customer_unique_id -> mapped to be the unique identifier for postal customers
+	- customer_zip_code -> mapped to assigned Texas ZIP
+	- customer_city -> mapped to assigned Texas city
+	- customer_state -> mapped to assigned Texas county
+End goal is to have the postal customers table populated, where each record represents a unique character, while also ensuring a realistic customer demographic through using the customer geographic distribution found within the Olist customer dataset.
+
+
+
+The most pressing issue is how to determine the shipping details of each package. Within our MySQL database, we need to keep track the package lifecycles of 2 different package flow types: Peer-to-Peer (P2P) and Business-to-Customer (B2C). P2P packages are when one customer sends an item or package to a post office (origin facility) to be delivered to another customer. while B2C packages are when a customer orders a product online thus that business delivers the product to a mail processing facility (origin facility) to be deliver to that customer.
+
+The full package lifecycle for each flow type looks like this:
+
+ - (B2C) customer orders product from business -> business sends product to mail processing facility (origin facility) -> product is packaged and sorted -> package is sent to a network facility or other mail processing facility that is near destination -> package is sent to post office that is near destination -> package is either picked up, delivered locally, or sent to Smartlocker.
+
+
+ - (P2P) post office (origin facility) receives item(s) from one customer wanting to deliver to another customer -> post office packages and sorts item(s) -> package departs from post office and is sent to nearest network facility -> package is sent to mail processing facility nearest to destination -> package sent to network facility near destination -> package sent to post office that is closest to destination -> package is either picked up, delivered locally, or sent to Smartlocker.
+
+
+Thus, to simulate realistic trends I plan to use the Olist E-Commerce dataset to simulate realistic package order frequency and realistic timestamps for package received, sorting, and departing at the origin facility. For realistic timestamps for middle-mile logisitics, I plan to use the Delhivery dataset for inspiration.
+
+- Each order + seller within the Olist dataset represents a single package within our postal demo.
+	- olist.order_status can be mapped to package status to reference whether a package has been delivered, shipped, delayed, etc.
+	- olist.order_purchase_timestamp will represents the timestamp of when a ORIGIN FACILITY has received a package from a customer/business.
+	- olist.order_approved_at will represent the timestamp of when the package was "sorted" at the origin facility (sorted means the item being processed/packaged into a box)
+	- olist.order_delivered_carrier_date will represent the time a package departs from the origin facility
+- For the actual contents and dimensions (weight, length, width, height) of a package, those will derive from the olist_order_items_dataset.csv and the olist_products_dataset.csv.
+  The olist_order_items_dataset.csv has each record represent what types of products are within the order, # of products that order requests, and the price and freight value.
+  The olist_products_dataset.csv has each record represent info pertaining to each unique product, such as a product's dimensions.
+	- Thus, for a package's shipping_cost we can use the fields within the order items dataset to map values into a package's shipping cost like...
+		- Totaling all the freight values of each item within the order to represent a package's material cost or maybe even transportation cost.
+		- Totaling all the prices of each item within an order can represent the actual charge we give to a customer for that package.
+	- For each package's dimensions (weight, length, width, height) we can use the olist_products_dataset.csv
+		- Since the order items dataset tells us what specific items is in each order (or each package) we can use the products dataset to find the dimensions of each product and total them together for the overall package dimensions. However, we need to decide an exact method of how we total all product dimensions. A box size depends on how we stack each item together to fit inside a box.
+
+
+- For the shipping details of each package, how that is generated will depend on the type of package flow: 
+For example, for B2C packages we can assume that the origin facility will be the mail processing facility that is closest to the territoryID of the business that is delivering the product to us. For the packages destination, it will simply be the territoryID of the customer or the customer's preferred facility depending on whether the package is a delivery, pickup, or smartlocker.
+
+For P2P packages, the package has to originate from one customer and be delivered to another. The two customers involved within a P2P package exchange must be greater than a minimum distance baseline, this is to ensure that no P2P sender is so close to a P2P recipient as it wouldn't make sense for a customer to send a package via USPS to someone else if they were in driving distance. Since we're using Olist dataset relationship of order -> customer to map our P2P package -> sender, we'll also use the preferred facility ID of every customer as the origin facility (which should also always be a post office facility).
+
+
+
+
+
+After a package has been received, the package_movement table will track the historical snapshots of each time a package is being received, sorted, or departed from a facility; however, with this idea also comes the responsibility of ensuring business logic remains sound. This will likely require and abundance of constraints, triggers, stored procedures, and various lookup/rules tables to enforce these rules. For example...
+
+If a package is a B2C package, for every package_movement record associated with that package, that record must be associated by an employee that is associated with the correct facility and department. For example, when a B2C package is first received at it's origin facility or departs from their origin facility the employee_id must be from an employee who not only works at the facility of where that package is at, but also be of the "Logistics" department of that facility. However, when that B2C package is getting sorted at their origin mail processing facility, the employee_id has to represent an employee from that facility's "Operations" department instead. 
+
+Likewise for P2P packages, when that package is first received that action must be processed by a employee who works for the "Retail Services" department of that Post Office. Sorted by an "Logistics" department of that post office, and departed from an "Delivery" employee of that same post office. 
+
+Lastly, the to_facility_id must also make sense. For B2C packages, we have to check if there is a mail processing/network facility that is closer to the destinationID their their origin facility. If there is the package would go there first, if not they would go to the postal office that is closest to the destination territoryID. For P2P packages, they are checking for any network facilities or mail processing facilities that closer to the destination their the P2P package's origin post office. If there is a network/mail processing facility closer the packages goes there, if not the package goes directly to the destination.
+		
+
+Constraints & triggers needed to enforce business rules:
+
+
+
+
+
+
+Procedures will be needed to move through an entire business workflow.
+
+Prefixes:
+Basic procedures that deal with basic entity initiation and validation will have a one letter prefix.
+	- "c_" for customers
+	- "e_" for employees
+	- "f_" for departments & facilities
+	- "b_" for businesses
+Use pkg_init_ for the whole package setup group.
+Use pkg_move_ for movement lifecycle procedures.
+Use pkg_cost_ for shipping/revenue/cost procedures.
+Use cust_ / emp_ / fac_ for entity setup procedures.
+
+
+
+For example, for pkg_init_ResolveRecipientTerritory and pkg_init_ResolveSenderTerritory I know all I have to do is refactor the procedures to reference the binary IDs and remove any references to columns that do not exist right?  How about for pkg_init_pkg_init_DetermineOriginFacility and pkg_init_DetermineDestinationFacility? Since we split our type of packages between B2C and P2P, I'm assuming this complicates the logic of how we use procedures right?
+
+For example, like pkg_init_DetermineOriginFacility should return the facilityID of a package right? But since we've modified our database to separate our packages into two types of flows (B2C & P2P) then that means we need to refactor our logic to consider the difference of B2C and P2P packages right? So for B2C, this pkg_init_DetermineOriginFacility should return business.preferred_facility_id while ensuring that facility is a Mail Processing facility. Likewise, for P2P packages it should return the customer.preferred_facility_id and ensure the facility is a post offce right? 
+
+Furthermore, depending on the type of package flow backfall logic will also be different. For example for B2C packages:
+1. Use requested origin facility if provided and valid Mail Processing
+2. Else use business.preferred_facility_id if valid Mail Processing
+3. Else find nearest Mail Processing facility to business territory/ZIP
+
+But with P2P packages:
+1. Use requested origin facility if provided and valid Post Office
+2. Else use sender_customer.preferred_facility_id if valid Post Office
+3. Else find nearest Post Office to sender territory/ZIP
+
+
+
+
+Lastly, in addition to tracking basic entities and our package movement lifecycle we also keep track of all "incidents" that occur all throughout the packages lifecycle and even which of those incidents result into refunds. For context, an "incident" is basically an event that signals something went wrong with a certain package. There are several types of these incidents including...
+	- Damaged Package
+	- Lost Package
+	- Delayed Delivery
+	- Customer Complaint
+	- Employee Accident
+	- Tracking Error
+	- Facility Issue
+	- Cancelled Package
+	- Returned Package
+	- Other
+And each of these incidents can also be further categorized by the severity of the incident (Low, Medium, High, Critical) and the current status of the incident (Open, Investigating, Resolved, & Closed) which allow us to gain context info on what kind of incident occurred within a package. This is also important because incidents are directly tied to refunds within this company scenario.
+
+The main reason(s) why we track incidents is because not only does it help us determine why a customer requested a refund for that transaction, but it also helps in determining whether we should accept or reject a refund request. Within this postal scenario, a refund can only be requested if there was an incident with a package, and further a refund can only be accepted/disbursed if a human manually deems it so by judging the incident by it's severity and type (done via web application). Furthermore, it should be enforce that only employees that work at a Administrative Office facility can review and deny/accept a refund request.
+
+Hence, why we enforce the relationship that a refund record can only exist with a valid package, package_movement, and incident record.

@@ -1,0 +1,16 @@
+PowerBI Security Context:
+
+
+
+For "financial reports", only employees under an "Administrative Office" facility or a facility managers will be allowed to view the web page that contains the embedded PowerBI report.
+	- However, facility managers will view the report with extreme RLS as they will only be able to see the finances related to their specific facility.
+	- Only administrative office employees are allowed to see the "full" financial report.
+
+
+
+
+For "logistic "reports", which will be PowerBI reports that show the package_movements & related incidents of all facilities/departments/employees, will be available to all employees under the Post Office, Network Facility, and Mail Processing Facilities; however, will have row level security depending on their hierarchy. For example...
+
+	- Facility managers can only see all package_movement/incident records related to their facility. That means all departments and all employees of those departments.
+	- Department managers can only see the package_movement/incident records of all employees under their department.
+	- Employees can only see their own package_movement events or incident they're associated with
