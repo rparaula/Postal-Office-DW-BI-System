@@ -26,11 +26,12 @@ Password: adminpassword
 
 <h1 align="center">🎯Project Goals🎯</h1>
 ---------------------------------------------------------
-- Build an end-to-end data warehouse pipeline from OLTP source data to BI reporting
-- Simulate realistic postal operations such as packages, movements, facilities, incidents, refunds, and revenue
-- Use a medallion-style architecture: source, staging, storage, warehouse, and presentation
-- Create Power BI dashboards for financial and logistical reporting
-- Prepare the system for web application embedding
+
+* Build an end-to-end data warehouse pipeline from OLTP source data to BI reporting
+* Simulate realistic postal operations such as packages, movements, facilities, incidents, refunds, and revenue
+* Use a medallion-style architecture: source, staging, storage, warehouse, and presentation
+* Create Power BI dashboards for financial and logistical reporting
+* Prepare the system for web application embedding
 
 
 ---------------------------------------------------------
@@ -39,7 +40,7 @@ Password: adminpassword
 
 
 
-![Architecture Diagram](images\architecture.drawio.svg)
+![Architecture Diagram](images/architecture.drawio.svg)
 
 
 ---------------------------------------------------------
