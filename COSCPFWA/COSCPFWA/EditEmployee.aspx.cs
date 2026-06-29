@@ -2,6 +2,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Configuration;
 using System.Globalization;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -9,6 +10,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("WebAdmin", "ReportAdmin");
             employeeID.Attributes["min"] = "1";
             salary.Attributes["min"] = "0";
             salary.Attributes["step"] = "0.01";

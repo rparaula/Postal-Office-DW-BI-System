@@ -2,6 +2,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Configuration;
 using System.Data;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -9,6 +10,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("Customer");
         }
 
         protected void ViewReport_Click(object sender, EventArgs e)
@@ -38,6 +40,7 @@ namespace COSCPFWA
             {
                 try
                 {
+                    // TODO(auth-first): This page still joins legacy tracking/shipping tables from the older app schema.
                     conn.Open();
                     string query = @"
                         SELECT c.customer_id,

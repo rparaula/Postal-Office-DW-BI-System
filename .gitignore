@@ -8,3 +8,5 @@
 # Ignore config files containing secrets
 COSCPFWA/COSCPFWA/Web.config
 COSCPFWA/COSCPFWA/Web.Debug.config
+data_warehouse/source_layer/DemoOLTP
+COSCPFWA/COSCPFWA/ConnectionStrings.local.config

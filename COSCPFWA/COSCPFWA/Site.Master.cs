@@ -1,72 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
+using System;
+using COSCPFWA.Models;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
-    public partial class SiteMaster : MasterPage
+    public partial class SiteMaster : System.Web.UI.MasterPage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                string userRole = Session["RoleName"] as string;
-
-                phCustomerNav.Visible = false;
-                phEmployeeNav.Visible = false;
-                phAdminNav.Visible = false;
-
-                if (userRole == "Customer")
-                {
-                    phCustomerNav.Visible = true;
-                }
-                else if (userRole == "Employee")
-                {
-                    phEmployeeNav.Visible = true;
-                }
-                else if (userRole == "Admin")
-                {
-                    phAdminNav.Visible = true;
-                }
-                else
-                {
-                    // optional: Redirect to login if role is undefined
-                    Response.Redirect("~/Login.aspx");
-                }
-            }
-
+            ApplyNavigationVisibility(Authz.CurrentUser);
             SetDashboardLink();
         }
+
         protected void Logout(object sender, EventArgs e)
         {
-            // Clear the session and redirect to login page
             Session.Clear();
             Session.Abandon();
-            Response.Redirect("~/Login.aspx");
+            Response.Redirect("~/Login.aspx", false);
+            Context.ApplicationInstance.CompleteRequest();
         }
 
         private void SetDashboardLink()
         {
-            var userRole = Session["RoleName"] as string;
-
-            switch (userRole)
+            CurrentUser user = Authz.CurrentUser;
+            if (user == null)
             {
-                case "Customer":
-                    navbarBrand.HRef = "~/CustomerDashboard";
-                    break;
-                case "Employee":
-                    navbarBrand.HRef = "~/EmployeeDashboard";
-                    break;
-                case "Admin":
-                    navbarBrand.HRef = "~/AdminDashboard";
-                    break;
-                default:
-                    navbarBrand.HRef = "~/Home"; // Fallback to home page if role is unknown
-                    break;
+                navbarBrand.HRef = "~/Home.aspx";
+                return;
             }
+
+            if (user.HasAnyRole("WebAdmin", "ReportAdmin"))
+            {
+                navbarBrand.HRef = "~/AdminDashboard.aspx";
+                return;
+            }
+
+            if (user.HasAnyRole("Employee", "DepartmentManager", "FacilityManager", "ReportAnalyst"))
+            {
+                navbarBrand.HRef = "~/EmployeeDashboard.aspx";
+                return;
+            }
+
+            if (user.HasRole("Customer"))
+            {
+                navbarBrand.HRef = "~/CustomerDashboard.aspx";
+                return;
+            }
+
+            navbarBrand.HRef = "~/Home.aspx";
+        }
+
+        private void ApplyNavigationVisibility(CurrentUser user)
+        {
+            bool isLoggedIn = user != null;
+
+            phCustomerNav.Visible = isLoggedIn && user.HasRole("Customer");
+            phEmployeeNav.Visible = isLoggedIn && user.HasAnyRole("Employee", "DepartmentManager", "FacilityManager", "WebAdmin", "ReportAdmin");
+            phFinanceNav.Visible = isLoggedIn && user.CanViewFinance;
+            phLogisticsNav.Visible = isLoggedIn && user.CanViewLogistics;
+            phAdminNav.Visible = isLoggedIn && user.HasAnyRole("WebAdmin", "ReportAdmin");
+            lnkLogin.Visible = !isLoggedIn;
+            btnLogout.Visible = isLoggedIn;
         }
     }
 }

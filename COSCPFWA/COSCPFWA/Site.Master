@@ -85,21 +85,28 @@
                                     <li><a class="dropdown-item" runat="server" href="~/TrackCustomerPackage">Track Shipment</a></li>
                                 </ul>
                             </li>
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/Checkpackages">Check Packages</a></li>
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/ViewTable">View Tables</a></li>
                             <li class="nav-item"><a class="nav-link" runat="server" href="~/Refunds">Refunds Activity</a></li>
+                        </asp:PlaceHolder>
+
+                        <asp:PlaceHolder ID="phLogisticsNav" runat="server">
+                            <li class="nav-item"><a class="nav-link" runat="server" href="~/Checkpackages">Check Packages</a></li>
+                        </asp:PlaceHolder>
+
+                        <asp:PlaceHolder ID="phFinanceNav" runat="server">
+                            <li class="nav-item"><a class="nav-link" runat="server" href="~/DataReportRequest">Reports</a></li>
                         </asp:PlaceHolder>
 
                         <!-- Admin Navigation -->
                         <asp:PlaceHolder ID="phAdminNav" runat="server">
                             <li class="nav-item"><a class="nav-link" runat="server" href="~/Employee">Employee</a></li>
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/DataReportRequest">Reports</a></li>
+                            <li class="nav-item"><a class="nav-link" runat="server" href="~/ViewTable">View Tables</a></li>
                         </asp:PlaceHolder>
 
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/About">About</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Contact">Contact</a></li>
                     </ul>
                     <div class="d-flex ms-auto">
+                        <asp:HyperLink ID="lnkLogin" CssClass="btn btn-outline-light me-2" runat="server" NavigateUrl="~/Login.aspx">Log In</asp:HyperLink>
                         <asp:Button ID="btnLogout" CssClass="btn btn-outline-light" runat="server" Text="Log Out" OnClick="Logout" />
                     </div>
                 </div>

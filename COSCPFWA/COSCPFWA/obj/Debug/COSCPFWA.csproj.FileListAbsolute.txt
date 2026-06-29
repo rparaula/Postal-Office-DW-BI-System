@@ -733,3 +733,7 @@ Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply C
 Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\obj\Debug\COSCPFWA.csproj.Up2Date
 Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\obj\Debug\COSCPFWA.dll
 Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\obj\Debug\COSCPFWA.pdb
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\bin\Microsoft.Configuration.ConfigurationBuilders.Base.dll
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\bin\Microsoft.Configuration.ConfigurationBuilders.UserSecrets.dll
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\bin\Microsoft.Configuration.ConfigurationBuilders.Base.xml
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\COSCPFWA\bin\Microsoft.Configuration.ConfigurationBuilders.UserSecrets.xml

@@ -28,3 +28,12 @@ C:\Users\sjgam\Documents\GitHub\WebappCOSC\COSCPFWA\WeeklyRiskNotification\obj\D
 C:\Users\sjgam\Documents\GitHub\WebappCOSC\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.dll
 C:\Users\sjgam\Documents\GitHub\WebappCOSC\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\refint\WeeklyRiskNotification.dll
 C:\Users\sjgam\Documents\GitHub\WebappCOSC\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.pdb
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.csproj.AssemblyReference.cache
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.GeneratedMSBuildEditorConfig.editorconfig
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.AssemblyInfoInputs.cache
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.AssemblyInfo.cs
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.csproj.CoreCompileInputs.cache
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.sourcelink.json
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.dll
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\refint\WeeklyRiskNotification.dll
+Z:\Computer Science\GitHub Repositories\Personal Projects\Postal Office Supply Chain ML Pipeline\COSCPFWA\WeeklyRiskNotification\obj\Debug\net8.0\WeeklyRiskNotification.pdb

@@ -60,6 +60,33 @@ namespace COSCPFWA
         protected global::System.Web.UI.WebControls.PlaceHolder phAdminNav;
 
         /// <summary>
+        /// phLogisticsNav control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phLogisticsNav;
+
+        /// <summary>
+        /// phFinanceNav control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phFinanceNav;
+
+        /// <summary>
+        /// lnkLogin control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink lnkLogin;
+
+        /// <summary>
         /// btnLogout control.
         /// </summary>
         /// <remarks>

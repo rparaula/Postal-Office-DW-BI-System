@@ -7,6 +7,7 @@ using System.Data;
 using System.Globalization;
 using System.Text;
 using System.Web.UI.WebControls;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -18,9 +19,12 @@ namespace COSCPFWA
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireLogin();
+
             if (!IsPostBack)
             {
                 PopulateOrderByDropdown();
+                ApplyAuthorizedReportTypes();
             }
         }
 
@@ -293,6 +297,12 @@ namespace COSCPFWA
                 return false;
             }
 
+            if (!EnsureReportTypeAccess(filters.ReportType))
+            {
+                ShowAlert("You are not authorized to access that report type.");
+                return false;
+            }
+
             if (filters.ReportType == CustomerReport || filters.ReportType == RevenueReport)
             {
                 filters.CustomerFirstName = customerFirstName.Text.Trim();
@@ -374,6 +384,49 @@ namespace COSCPFWA
         private string GetConnectionString()
         {
             return ConfigurationManager.ConnectionStrings["DataBaseConnectionString"]?.ConnectionString;
+        }
+
+        private void ApplyAuthorizedReportTypes()
+        {
+            if (Authz.CurrentUser == null)
+            {
+                return;
+            }
+
+            ListItem customerItem = reportType.Items.FindByValue(CustomerReport);
+            if (customerItem != null)
+            {
+                customerItem.Enabled = Authz.CurrentUser.CanViewLogistics;
+            }
+
+            ListItem employeeItem = reportType.Items.FindByValue(EmployeeReport);
+            if (employeeItem != null)
+            {
+                employeeItem.Enabled = Authz.CurrentUser.CanViewLogistics;
+            }
+
+            ListItem revenueItem = reportType.Items.FindByValue(RevenueReport);
+            if (revenueItem != null)
+            {
+                revenueItem.Enabled = Authz.CurrentUser.CanViewFinance;
+            }
+        }
+
+        private static bool EnsureReportTypeAccess(string reportTypeValue)
+        {
+            if (reportTypeValue == RevenueReport)
+            {
+                Authz.RequireFinanceAccess();
+                return Authz.CurrentUser != null && Authz.CurrentUser.CanViewFinance;
+            }
+
+            if (reportTypeValue == CustomerReport || reportTypeValue == EmployeeReport)
+            {
+                Authz.RequireLogisticsAccess();
+                return Authz.CurrentUser != null && Authz.CurrentUser.CanViewLogistics;
+            }
+
+            return false;
         }
 
         private void ShowAlert(string message)

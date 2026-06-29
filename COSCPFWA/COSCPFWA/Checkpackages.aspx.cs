@@ -4,11 +4,17 @@ using System.Configuration;
 using System.Data;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
     public partial class CheckPackages : System.Web.UI.Page
     {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Authz.RequireAnyRole("Employee", "DepartmentManager", "FacilityManager", "WebAdmin", "ReportAdmin");
+        }
+
         protected void CheckPackagesButton_Click(object sender, EventArgs e)
         {
             BindPackages();

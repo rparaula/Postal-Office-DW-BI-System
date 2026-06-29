@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -11,6 +12,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("WebAdmin", "ReportAdmin");
             LoadEmployees();
         }
 

@@ -2,6 +2,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Configuration;
 using System.Text.RegularExpressions;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -9,6 +10,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("Customer");
         }
 
         protected void SubmitPackageDetails_Click(object sender, EventArgs e)
@@ -53,6 +55,7 @@ namespace COSCPFWA
             {
                 try
                 {
+                    // TODO(auth-first): This page still assumes legacy package/customer columns and integer identifiers.
                     conn.Open();
                     int customerId = GetCurrentCustomerId(conn);
                     int packageStatusId = GetRequiredId(conn, "package_status", "package_status_id", "status_name", "Received");

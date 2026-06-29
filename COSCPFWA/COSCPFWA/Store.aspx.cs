@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using MySql.Data.MySqlClient;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -8,6 +9,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("Customer");
             if (!IsPostBack)
             {
                 return;
@@ -43,6 +45,7 @@ namespace COSCPFWA
             {
                 try
                 {
+                    // TODO(auth-first): This page still references legacy store/inventory customer linkage patterns.
                     conn.Open();
                     using (MySqlTransaction transaction = conn.BeginTransaction())
                     {

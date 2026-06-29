@@ -3,6 +3,7 @@ using System;
 using System.Configuration;
 using System.Globalization;
 using System.Web.UI;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -10,6 +11,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("Customer");
         }
 
         protected void btnSchedulePickup_Click(object sender, EventArgs e)
@@ -72,6 +74,7 @@ namespace COSCPFWA
             {
                 try
                 {
+                    // TODO(auth-first): This page still uses legacy pickup/package/customer assumptions.
                     conn.Open();
                     using (MySqlTransaction transaction = conn.BeginTransaction())
                     {

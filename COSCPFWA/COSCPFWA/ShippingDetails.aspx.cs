@@ -2,6 +2,7 @@ using System;
 using System.Configuration;
 using System.Web.UI.WebControls;
 using MySql.Data.MySqlClient;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -9,6 +10,7 @@ namespace COSCPFWA
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("Customer");
             if (!IsPostBack)
             {
                 BindShippingMethods();
@@ -42,6 +44,7 @@ namespace COSCPFWA
             {
                 try
                 {
+                    // TODO(auth-first): This page targets legacy shipping detail fields and integer package/customer IDs.
                     conn.Open();
                     int packageId = GetCurrentPackageId();
                     int senderCustomerId = GetSenderCustomerId(conn, packageId);

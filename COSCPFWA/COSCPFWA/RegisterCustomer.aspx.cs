@@ -1,8 +1,6 @@
 ﻿using System;
 using MySql.Data.MySqlClient;
 using System.Configuration;
-using System.Web.UI;
-
 namespace COSCPFWA
 {
     public partial class RegisterCustomer : System.Web.UI.Page
@@ -63,8 +61,8 @@ namespace COSCPFWA
                                 }
                             }
 
-                            string insertUserQuery = @"INSERT INTO user_logins (first_name, last_name, email, username, password_hash)
-                                                       VALUES (@FirstName, @LastName, @Email, @Username, @Password)";
+                            string insertUserQuery = @"INSERT INTO user_logins (first_name, last_name, email, username, password_hash, is_active)
+                                                       VALUES (@FirstName, @LastName, @Email, @Username, @Password, 1)";
                             using (MySqlCommand insertCmd = new MySqlCommand(insertUserQuery, conn, transaction))
                             {
                                 insertCmd.Parameters.AddWithValue("@FirstName", firstName);
@@ -77,7 +75,7 @@ namespace COSCPFWA
                                 if (rowsAffected > 0)
                                 {
                                     long newUserId = insertCmd.LastInsertedId;
-                                    int customerRoleId = GetOrCreateRoleId(conn, transaction, "Customer");
+                                    int customerRoleId = GetCustomerRoleId(conn, transaction);
 
                                     string insertRoleQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (@UserID, @RoleID)";
                                     using (MySqlCommand roleCmd = new MySqlCommand(insertRoleQuery, conn, transaction))
@@ -123,12 +121,11 @@ namespace COSCPFWA
             }
         }
 
-        private int GetOrCreateRoleId(MySqlConnection conn, MySqlTransaction transaction, string roleName)
+        private int GetCustomerRoleId(MySqlConnection conn, MySqlTransaction transaction)
         {
-            string selectRoleQuery = "SELECT role_id FROM roles WHERE role_name = @RoleName LIMIT 1";
+            string selectRoleQuery = "SELECT role_id FROM roles WHERE role_code = 'Customer' LIMIT 1";
             using (MySqlCommand selectRoleCmd = new MySqlCommand(selectRoleQuery, conn, transaction))
             {
-                selectRoleCmd.Parameters.AddWithValue("@RoleName", roleName);
                 object existingRoleId = selectRoleCmd.ExecuteScalar();
                 if (existingRoleId != null)
                 {
@@ -136,13 +133,7 @@ namespace COSCPFWA
                 }
             }
 
-            string insertRoleQuery = "INSERT INTO roles (role_name) VALUES (@RoleName)";
-            using (MySqlCommand insertRoleCmd = new MySqlCommand(insertRoleQuery, conn, transaction))
-            {
-                insertRoleCmd.Parameters.AddWithValue("@RoleName", roleName);
-                insertRoleCmd.ExecuteNonQuery();
-                return Convert.ToInt32(insertRoleCmd.LastInsertedId);
-            }
+            throw new InvalidOperationException("The Customer role is missing from roles. Public registration requires a pre-seeded Customer role.");
         }
     }
 }

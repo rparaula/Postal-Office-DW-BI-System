@@ -2,6 +2,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Configuration;
 using System.Data;
+using COSCPFWA.Security;
 
 namespace COSCPFWA
 {
@@ -15,6 +16,7 @@ namespace COSCPFWA
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            Authz.RequireAnyRole("Employee", "DepartmentManager", "FacilityManager", "WebAdmin", "ReportAdmin");
         }
 
         protected void TrackButton_Click(object sender, EventArgs e)
@@ -37,6 +39,7 @@ namespace COSCPFWA
             {
                 try
                 {
+                    // TODO(auth-first): This page still depends on legacy tracking/shipping tables.
                     conn.Open();
                     string query = @"
                         SELECT p.package_id,
