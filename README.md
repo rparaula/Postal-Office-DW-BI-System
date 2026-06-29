@@ -40,7 +40,7 @@ Password: adminpassword
 
 
 
-![Architecture Diagram](images/architecture.drawio.svg)
+![Architecture Diagram](images/warehouse_architecture.drawio.svg)
 
 
 ---------------------------------------------------------
