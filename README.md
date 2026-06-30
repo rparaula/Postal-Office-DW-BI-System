@@ -14,8 +14,6 @@ Within our web application, you can log in with the following credentials to vie
 ### Permissions:
 Username, Password
 
-Administrative Office Employees:
-- 
 
 
 Facility Managers:
@@ -26,7 +24,7 @@ Facility Managers:
 * laura.perez.4.7.1@postal-demo.local, Emp-000011!
 * stacie.marshall.5.11.1@postal-demo.local, Emp-000015!
 
-Report Analysts:
+Administrative Office Employees (Report Analysts):
 
 * lisa.silva.56.30.1@postal-demo.local, Emp-000163!
 * jeff.bush.156.31.1@postal-demo.local, Emp-000460!
