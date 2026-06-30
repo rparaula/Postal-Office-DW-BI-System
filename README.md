@@ -19,50 +19,51 @@ Administrative Office Employees:
 
 
 Facility Managers:
-danielle.johnson.1.1.1@postal-demo.local, Emp-000001!
-tricia.roman.2.4.1@postal-demo.local, Emp-000005!
-richard.david.3.22.1@postal-demo.local, Emp-000008!
-laura.perez.4.7.1@postal-demo.local, Emp-000011!
-stacie.marshall.5.11.1@postal-demo.local, Emp-000015!
 
+* danielle.johnson.1.1.1@postal-demo.local, Emp-000001!
+* tricia.roman.2.4.1@postal-demo.local, Emp-000005!
+* richard.david.3.22.1@postal-demo.local, Emp-000008!
+* laura.perez.4.7.1@postal-demo.local, Emp-000011!
+* stacie.marshall.5.11.1@postal-demo.local, Emp-000015!
 
 Report Analysts:
-lisa.silva.56.30.1@postal-demo.local, Emp-000163!
-jeff.bush.156.31.1@postal-demo.local, Emp-000460!
-jonathan.lawson.198.32.1@postal-demo.local, Emp-000584!
-benjamin.vazquez.410.33.1@postal-demo.local, Emp-001210!
-brittany.lozano.56.30.2@postal-demo.local, Emp-002452!
 
+* lisa.silva.56.30.1@postal-demo.local, Emp-000163!
+* jeff.bush.156.31.1@postal-demo.local, Emp-000460!
+* jonathan.lawson.198.32.1@postal-demo.local, Emp-000584!
+* benjamin.vazquez.410.33.1@postal-demo.local, Emp-001210!
+* brittany.lozano.56.30.2@postal-demo.local, Emp-002452!
 
 Department Managers:
-jesse.garcia.1.2.1@postal-demo.local, Emp-000002!
-jason.hahn.1.1091.1@postal-demo.local, Emp-000003!
-sherri.frazier.2.3.1@postal-demo.local, Emp-000004!
-timothy.hancock.3.21.1@postal-demo.local, Emp-000007!
-brandi.hernandez.4.6.1@postal-demo.local, Emp-000010!
 
+* jesse.garcia.1.2.1@postal-demo.local, Emp-000002!
+* jason.hahn.1.1091.1@postal-demo.local, Emp-000003!
+* sherri.frazier.2.3.1@postal-demo.local, Emp-000004!
+* timothy.hancock.3.21.1@postal-demo.local, Emp-000007!
+* brandi.hernandez.4.6.1@postal-demo.local, Emp-000010!
 
 Employees:
-anthony.gonzalez.1.1.2@postal-demo.local, Emp-002048!
-noah.howard.1.1.3@postal-demo.local, Emp-002049!
-nicole.ward.1.1.4@postal-demo.local, Emp-002050!
-jessica.martin.1.2.2@postal-demo.local, Emp-002051!
-reginald.robinson.1.1091.2@postal-demo.local, Emp-002052!
 
+* anthony.gonzalez.1.1.2@postal-demo.local, Emp-002048!
+* noah.howard.1.1.3@postal-demo.local, Emp-002049!
+* nicole.ward.1.1.4@postal-demo.local, Emp-002050!
+* jessica.martin.1.2.2@postal-demo.local, Emp-002051!
+* reginald.robinson.1.1091.2@postal-demo.local, Emp-002052!
 
 
 Customers:
-kevin.patel.0000366f@postal-demo.example, Cust-0000366f!
-elena.martinez.0000b849@postal-demo.example, Cust-0000b849!
-lauren.johnson.0000f46a@postal-demo.example, Cust-0000f46a!
-gabriela.taylor.0000f6cc@postal-demo.example, Cust-0000f6cc!
-gabriela.vasquez.0004aac8@postal-demo.example, Cust-0004aac8!
 
+* kevin.patel.0000366f@postal-demo.example, Cust-0000366f!
+* elena.martinez.0000b849@postal-demo.example, Cust-0000b849!
+* lauren.johnson.0000f46a@postal-demo.example, Cust-0000f46a!
+* gabriela.taylor.0000f6cc@postal-demo.example, Cust-0000f6cc!
+* gabriela.vasquez.0004aac8@postal-demo.example, Cust-0004aac8!
 
 
 
 <h1 align="center">📋To-do List📋</h1>
 ---------------------------------------------------------
+
 Here is a list of all flaws I have found in the project so far. I will be working on these issues in the coming weeks:
 
 
@@ -169,15 +170,6 @@ Overview
 --------
 Add stuff here
 
-
-
-
-
-
-<h1 align="center">📦Web Application📦</h1>
-Overview
---------
-Add stuff here
 
 
 
