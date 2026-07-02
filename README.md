@@ -68,35 +68,37 @@ Here is a list of all flaws I have found in the project so far. I will be workin
 
 
 #### Synthetic Dataset
-	- Spread customers/packages across lesser counties. Larger counties like Harris and Dallas have too large of a monopoly.
-	- Ensure realistic incident/refund data.
-	- Expand to either a larger date range or larger geographical range if possible.
+* Spread customers/packages across lesser counties. Larger counties like Harris and Dallas have too large of a monopoly.
+
+* Ensure realistic incident/refund data.
+
+* Expand to either a larger date range or larger geographical range if possible.
 
 
 #### MySQL OLTP Database
-	- Normalize entire database to ensure all tables satisfy 1NF, 2NF, & 3NF
-	- Figure out a better formula to determine costs and revenue
+* Normalize entire database to ensure all tables satisfy 1NF, 2NF, & 3NF
+* Figure out a better formula to determine costs and revenue
 
 
 
 #### Azure Data factory
-	- Redesign pipeline so that all scripts are an iterative program runs through each table individually. Scripts should utilize metadata so that the actual transformations depend on the table instead of being hardcoded.
+* Redesign pipeline so that all scripts are an iterative program runs through each table individually. Scripts should utilize metadata so that the actual transformations depend on the table instead of being hardcoded.
 
 #### ADLS Gen2
-	- Design strict data contracts to prevent schema drift and unforeseen changes.
+* Design strict data contracts to prevent schema drift and unforeseen changes.
 
 #### Databricks
-	- Redesign pipeline so that all scripts are an iterative program runs through each table individually. Scripts should utilize metadata so that the actual transformations depend on the table instead of being hardcoded.
-	- Add better Databricks documentation
+* Redesign pipeline so that all scripts are an iterative program runs through each table individually. Scripts should utilize metadata so that the actual transformations depend on the table instead of being hardcoded.
+* Add better Databricks documentation
 
 
 #### Azure Synapse
-	- Refactor db0 pipeline and data mart pipeline to be integrated as one process.
+* Refactor db0 pipeline and data mart pipeline to be integrated as one process.
 
 
 
 #### PowerBI
-	- Implement OLS/RLS that's based on the new web authentication layer.
+* Implement OLS/RLS that's based on the new web authentication layer.
 	
 
 
